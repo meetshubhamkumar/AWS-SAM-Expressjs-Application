@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: "2010-09-09" # Specifies the version of the AWS CloudFormation template format being used.
+
+Transform: AWS::Serverless-2016-10-31 # This applies the AWS SAM (Serverless Application Model) transform for serverless functions and APIs.
+
+Description: >
+  sam-app
+  Sample SAM Template for sam-app # Brief description of the template, used for identification and documentation.
+
+# Globals block defines common properties that are applied to serverless resources (e.g., functions).
+Globals:
+  Function:
+    Timeout: 3 # Sets a timeout of 3 seconds for all Lambda functions in this template.
+
+Resources:
+  MyCustomApi:
+    Type: AWS::Serverless::Api # Defines an API Gateway for the serverless application.
+    Properties:
+      Name: sam-app # Name of the API Gateway.
+      StageName: Prod # Defines the deployment stage name as 'Prod'.
+      # Domain:
+      #   DomainName: "" # Optional. Specify a custom domain for the API if desired.
+      #   CertificateArn: "" # Optional. Specify the ARN of the SSL certificate if using a custom domain.
+      #   EndpointConfiguration: REGIONAL # Sets the endpoint configuration as regional.
+
+  GetUserFunction:
+    Type: AWS::Serverless::Function # Defines a Lambda function in a serverless application.
+    Properties:
+      CodeUri: express/ # Directory path where the function code is stored.
+      Handler: src/server.handler # Entry point for the Lambda function.
+      Runtime: nodejs18.x # Specifies the runtime for the function, Node.js 18.x in this case.
+      Architectures:
+        - x86_64 # Architecture for the Lambda function, here set to x86_64.
+      Events:
+        HelloWorld:
+          Type: Api # Sets up API Gateway as the trigger for the Lambda function.
+          Properties:
+            RestApiId: !Ref MyCustomApi # Links the function to the previously defined API Gateway.
+            Path: /{proxy+} # Specifies a catch-all proxy path, allowing the API to handle any subpath.
+            Method: ANY # Allows any HTTP method (e.g., GET, POST) for the API requests.
